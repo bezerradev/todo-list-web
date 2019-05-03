@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>TODO List</title>
+</head>
+<body>
+
+<table id="tabela">
+  <tr>
+    <th>TODO</th>
+    <th>DOING</th>
+    <th>DONE</th>
+    <th>ACTIONS</th>
+  </tr>
+</table> 
+
+<input type="text" id="nomeTarefa"/>
+<br />
+<a onclick="adicionarTarefa()" href="#" value="adicionar">Adicionar Tarefa
+</a>
+ <script>
+ 	var listaTarefas = [];
+
+ 	function adicionarTarefa() {
+		var nomeTarefa = document.getElementById("nomeTarefa").value
+		document.getElementById("tabela").innerHTML += "<tr><td>"+nomeTarefa+"</td><td></td><td></td></tr>";
+	}
+</script> 
+</body>
+</html>
