@@ -1,30 +1,82 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<title>TODO List</title>
-</head>
-<body>
+    <head>
+            <meta charset="UTF-8">
 
-<table id="tabela">
-  <tr>
-    <th>TODO</th>
-    <th>DOING</th>
-    <th>DONE</th>
-    <th>ACTIONS</th>
-  </tr>
-</table> 
+    </head>
+    <body>
+            <input type="text" id="nome" />
+            <input type="date" id="dataCriacao" /> 
+    
+            <a href="#" onclick="insertTarefa()">Inserir Tarefa</a>
+    
+            <table id="todoTable">
+                <thead>
+                <tr>
+                        <th>Descricão</th>
+                        <th>Data de Criação</th>
+                        <th>Apagar</th>                       
+                </tr>
+            </thead>
+            <tbody id="todoTableBody">
 
-<input type="text" id="nomeTarefa"/>
-<br />
-<a onclick="adicionarTarefa()" href="#" value="adicionar">Adicionar Tarefa
-</a>
- <script>
- 	var listaTarefas = [];
+            </tbody>
+        </table>
+       
 
- 	function adicionarTarefa() {
-		var nomeTarefa = document.getElementById("nomeTarefa").value
-		document.getElementById("tabela").innerHTML += "<tr><td>"+nomeTarefa+"</td><td></td><td></td></tr>";
-	}
-</script> 
-</body>
+
+        <script>
+            
+            window.onload = function() {
+                drawTable();
+            };
+
+            var todoList = new Array;
+
+            t1 = {
+                nome: "PRIMEIRA TAREFA",
+                dataCriacao: "10/11/1996",
+                done: false
+            }
+            
+
+            t2 = {
+                nome: "SEGUNDA TAREFA",
+                dataCriacao: "10/11/1996",
+                done: false
+            }
+
+            todoList.push(t1);
+            todoList.push(t2);
+
+            function insertTarefa() {
+                todoList.push({
+                    nome: document.getElementById("nome").value,
+                    dataCriacao: document.getElementById("dataCriacao").value,
+                    done: false
+                });
+                document.getElementById("nome").value = "";
+                document.getElementById("dataCriacao").value = "";
+
+                console.log(todoList);
+
+                drawTable();
+            }
+            
+            function drawTable() {
+                document.getElementById("todoTableBody").innerHTML = "";
+                
+                for (i = 0; i < todoList.length; i++) {
+                    document.getElementById("todoTableBody").innerHTML += "<tr><td>" + todoList[i].nome + "</td><td>" + todoList[i].dataCriacao 
+                    + "</td>"+"<td>" + "<button value=\""+ i +"\" onclick=\"deleteTarefa()\">Apagar</button>" + "</td>"+"</tr>";
+                }
+            }
+
+            function deleteTarefa() {
+                todoList.splice(parseInt(event.srcElement.value), 1);
+
+                drawTable();
+            }
+        </script> 
+    </body>
 </html>
