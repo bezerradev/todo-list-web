@@ -1,81 +1,105 @@
 <!DOCTYPE html>
+<!--Autor: Mateus Oliveira <mateusocb@gmail.com>-->
 <html>
     <head>
-            <meta charset="UTF-8">
-
+        <meta charset="UTF-8">
     </head>
+
     <body>
-            <input type="text" id="nome" />
-            <input type="date" id="dataCriacao" /> 
-    
-            <a href="#" onclick="insertTarefa()">Inserir Tarefa</a>
-    
-            <table id="todoTable">
-                <thead>
+        <h1>Sistema de Gestão de Tarefas</h1>
+        <table border="1">
+            <tr>
+                <th colspan="2" align=˜center˜>Cadastro de Tarefas</th>
+            </tr>
+            <tr>
+                <td><label for="titulo">Título:</label></td>
+                <td><input type="text" id="titulo" /></td>
+            </tr>
+            <tr>
+                <td><label for="dataCriacao">Data de criação:</label></td>
+                <td><input type="date" id="dataCriacao" /></td> 
+            </tr>
+            <tr>
+                <td colspan="2" align="center"><button onclick="inserirTarefa()">Inserir Tarefa</button></td>
+            </tr>
+        </table>
+
+        <br />
+
+        <table id="todoTable" border="1">
+            <thead>
                 <tr>
-                        <th>Descricão</th>
-                        <th>Data de Criação</th>
-                        <th>Apagar</th>                       
+                    <th colspan="4" align=˜center˜>Listagem de Tarefas</th>
+                </tr>
+                <tr>
+                    <th>Descricão</th>
+                    <th>Data de Criação</th>
+                    <th>Completar</th>                       
+                    <th>Apagar</th>                       
                 </tr>
             </thead>
+            
             <tbody id="todoTableBody">
-
             </tbody>
         </table>
-       
+
 
 
         <script>
-            
-            window.onload = function() {
-                drawTable();
+            var listaDeTarefas = new Array;
+
+            window.onload = function () {
+                desenharTabela();
             };
 
-            var todoList = new Array;
 
-            t1 = {
-                nome: "PRIMEIRA TAREFA",
-                dataCriacao: "10/11/1996",
-                done: false
+
+            function desenharTabela() {
+                document.getElementById("todoTableBody").innerHTML = "";
+
+                var tabela = [];
+
+                for (i = 0; i < listaDeTarefas.length; i++) {
+                    tabela.push("<tr>");
+                    
+                    if (!listaDeTarefas[i].terminada) {
+                        tabela.push("<td>" + listaDeTarefas[i].titulo + "</td>");
+                        tabela.push("<td>" + listaDeTarefas[i].dataCriacao + "</td>");
+                    } else {
+                        tabela.push("<td><strike>" + listaDeTarefas[i].titulo + "</strike></td>");
+                        tabela.push("<td><strike>" + listaDeTarefas[i].dataCriacao + "</strike></td>");
+                    }
+                    
+                    tabela.push("<td><button value=\"" + i + "\" onclick=\"completarTarefa()\">Completar</button></td>");
+                    tabela.push("<td><button value=\"" + i + "\" onclick=\"deletarTarefa()\">Apagar</button></td>");
+                    tabela.push("</tr>");
+                }
+                document.getElementById("todoTableBody").innerHTML = tabela.join("");
             }
             
-
-            t2 = {
-                nome: "SEGUNDA TAREFA",
-                dataCriacao: "10/11/1996",
-                done: false
-            }
-
-            todoList.push(t1);
-            todoList.push(t2);
-
-            function insertTarefa() {
-                todoList.push({
-                    nome: document.getElementById("nome").value,
+            function inserirTarefa() {
+                listaDeTarefas.push({
+                    titulo: document.getElementById("titulo").value,
                     dataCriacao: document.getElementById("dataCriacao").value,
-                    done: false
+                    terminada: false
                 });
-                document.getElementById("nome").value = "";
+
+                document.getElementById("titulo").value = "";
                 document.getElementById("dataCriacao").value = "";
 
-                console.log(todoList);
-
-                drawTable();
+                desenharTabela();
             }
             
-            function drawTable() {
-                document.getElementById("todoTableBody").innerHTML = "";
-                
-                for (i = 0; i < todoList.length; i++) {
-                    document.getElementById("todoTableBody").innerHTML += "<tr><td>" + todoList[i].nome + "</td><td>" + todoList[i].dataCriacao 
-                    + "</td>"+"<td>" + "<button value=\""+ i +"\" onclick=\"deleteTarefa()\">Apagar</button>" + "</td>"+"</tr>";
-                }
+            function deletarTarefa() {
+                listaDeTarefas.splice(parseInt(event.srcElement.value), 1);
+
+                desenharTabela();
             }
 
-            function deleteTarefa() {
-                todoList.splice(parseInt(event.srcElement.value), 1);
+            function completarTarefa() {
+                listaDeTarefas[parseInt(event.srcElement.value)].terminada = true;
 
-                drawTable();
+                desenharTabela();
             }
         </script> 
     </body>
