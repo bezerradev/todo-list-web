@@ -9,15 +9,19 @@
         <h1>Sistema de Gestão de Tarefas</h1>
         <table border="1">
             <tr>
-                <th colspan="2" align=˜center˜>Cadastro de Tarefas</th>
+                <th colspan="3" align=˜center˜>Cadastro de Tarefas</th>
             </tr>
             <tr>
-                <td><label for="titulo">Título:</label></td>
-                <td><input type="text" id="titulo" /></td>
+                <td><label for="descricao">Descrição:</label></td>
+                <td><input type="text" id="descricao" /></td>
             </tr>
             <tr>
-                <td><label for="dataCriacao">Data de criação:</label></td>
-                <td><input type="date" id="dataCriacao" /></td> 
+                <td><label for="responsavel">Responsável:</label></td>
+                <td><input type="text" id="responsavel" /></td>
+            </tr>
+            <tr>
+                <td><label for="prazo">Prazo:</label></td>
+                <td><input type="date" id="prazo" /></td> 
             </tr>
             <tr>
                 <td colspan="2" align="center"><button onclick="inserirTarefa()">Inserir Tarefa</button></td>
@@ -29,16 +33,18 @@
         <table id="todoTable" border="1">
             <thead>
                 <tr>
-                    <th colspan="4" align=˜center˜>Listagem de Tarefas</th>
+                    <th colspan="6" align=˜center˜>Listagem de Tarefas</th>
                 </tr>
                 <tr>
+                    <th>Situacao</th>
                     <th>Descricão</th>
-                    <th>Data de Criação</th>
-                    <th>Completar</th>                       
+                    <th>Responsável</th>
+                    <th>Prazo</th>
+                    <th>Editar</th>
                     <th>Apagar</th>                       
                 </tr>
             </thead>
-            
+
             <tbody id="todoTableBody">
             </tbody>
         </table>
@@ -55,41 +61,61 @@
 
 
             function desenharTabela() {
-                document.getElementById("todoTableBody").innerHTML = "";
+                document.getElementById('todoTableBody').innerHTML = '';
 
                 var tabela = [];
 
                 for (i = 0; i < listaDeTarefas.length; i++) {
-                    tabela.push("<tr>");
-                    
-                    if (!listaDeTarefas[i].terminada) {
-                        tabela.push("<td>" + listaDeTarefas[i].titulo + "</td>");
-                        tabela.push("<td>" + listaDeTarefas[i].dataCriacao + "</td>");
+                    tabela.push('<tr>');
+
+                    if (!listaDeTarefas[i].terminada && !listaDeTarefas[i].atualiza) {
+                        tabela.push('<td><input type="checkbox" value="' + i + '" onclick="completarTarefa()"></td>');
+                        tabela.push('<td>' + listaDeTarefas[i].descricao + '</td>');
+                        tabela.push('<td>' + listaDeTarefas[i].responsavel + '</td>');
+                        tabela.push('<td>' + formatarData(listaDeTarefas[i].prazo) + '</td>');
+                    } else if (listaDeTarefas[i].atualiza) {
+                        if (listaDeTarefas[i].terminada) {
+                            tabela.push('<td><input id="alteraTerminada" type="checkbox" value="' + i + '" onclick="" checked></td>');
+                        } else {
+                            tabela.push('<td><input id="alteraTerminada" type="checkbox" value="' + i + '" onclick=""></td>');
+                        }
+                        tabela.push('<td><input id="alteraDescricao" type="text" value="' + listaDeTarefas[i].descricao + '"></td>');
+                        tabela.push('<td><input id="alteraResponsavel" type="text" value="' + listaDeTarefas[i].responsavel + '"></td>');
+                        tabela.push('<td><input id="alteraPrazo" type="date" value="' + listaDeTarefas[i].prazo + '"></td>');
+                        tabela.push('<td><button value="' + i + '" onclick="alterarTarefa()">Alterar</button></td>');
+                        tabela.push('<td><button value="' + i + '" onclick="cancelarEditarTarefa()">Cancelar</button></td>');
+                        tabela.push('</tr>');
+                        continue;
                     } else {
-                        tabela.push("<td><strike>" + listaDeTarefas[i].titulo + "</strike></td>");
-                        tabela.push("<td><strike>" + listaDeTarefas[i].dataCriacao + "</strike></td>");
+                        tabela.push('<td><input type="checkbox" value="' + i + '" onclick="completarTarefa()" checked></td>');
+                        tabela.push('<td><strike>' + listaDeTarefas[i].descricao + '</strike></td>');
+                        tabela.push('<td><strike>' + listaDeTarefas[i].responsavel + '</strike></td>');
+                        tabela.push('<td><strike>' + formatarData(listaDeTarefas[i].prazo) + '</strike></td>');
                     }
-                    
-                    tabela.push("<td><button value=\"" + i + "\" onclick=\"completarTarefa()\">Completar</button></td>");
-                    tabela.push("<td><button value=\"" + i + "\" onclick=\"deletarTarefa()\">Apagar</button></td>");
-                    tabela.push("</tr>");
+
+                    tabela.push('<td><button value="' + i + '" onclick="marcaEditarTarefa()">Editar</button></td>');
+                    tabela.push('<td><button value="' + i + '" onclick="deletarTarefa()">Apagar</button></td>');
+                    tabela.push('</tr>');
                 }
-                document.getElementById("todoTableBody").innerHTML = tabela.join("");
+                document.getElementById('todoTableBody').innerHTML = tabela.join('');
             }
-            
+
             function inserirTarefa() {
                 listaDeTarefas.push({
-                    titulo: document.getElementById("titulo").value,
-                    dataCriacao: document.getElementById("dataCriacao").value,
-                    terminada: false
+                    descricao: document.getElementById('descricao').value,
+                    prazo: document.getElementById('prazo').value,
+                    responsavel: document.getElementById('responsavel').value,
+                    terminada: false,
+                    atualiza: false
                 });
 
-                document.getElementById("titulo").value = "";
-                document.getElementById("dataCriacao").value = "";
+                document.getElementById('descricao').value = '';
+                document.getElementById('prazo').value = '';
+                document.getElementById('responsavel').value = '';
 
                 desenharTabela();
             }
-            
+
             function deletarTarefa() {
                 listaDeTarefas.splice(parseInt(event.srcElement.value), 1);
 
@@ -101,6 +127,41 @@
 
                 desenharTabela();
             }
+            function marcaEditarTarefa() {
+                listaDeTarefas[parseInt(event.srcElement.value)].atualiza = true;
+
+                desenharTabela();
+            }
+            function cancelarEditarTarefa() {
+                listaDeTarefas[parseInt(event.srcElement.value)].atualiza = false;
+
+                desenharTabela();
+            }
+
+            function alterarTarefa() {
+                var tarefa = listaDeTarefas[parseInt(event.srcElement.value)];
+
+                tarefa.descricao = document.getElementById('alteraDescricao').value;
+                tarefa.responsavel = document.getElementById('alteraResponsavel').value;
+                tarefa.prazo = document.getElementById('alteraPrazo').value;
+
+                if (document.getElementById('alteraTerminada').checked) {
+                    tarefa.terminada = true;
+                } else {
+                    tarefa.terminada = false;
+                }
+
+                tarefa.atualiza = false;
+
+                desenharTabela();
+            }
+
+            function formatarData(data) {
+                var dataDividida = data.split("-");
+
+                return dataDividida[2] + '/' + dataDividida[1] + '/' + dataDividida[0];
+            }
+
         </script> 
     </body>
 </html>
