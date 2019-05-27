@@ -1,174 +1,191 @@
 <!DOCTYPE html>
 <!--Autor: Mateus Oliveira <mateusocb@gmail.com>-->
 <html>
-    <head>
-        <meta charset="UTF-8">
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
-    </head>
 
-    <body>
-        <h1>Sistema de Gestão de Tarefas</h1>
-        <table border="1">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+</head>
+
+<body>
+    <h1>Sistema de Gestão de Tarefas</h1>
+    <table border="1">
+        <tr>
+            <th colspan="3" align=˜center˜>Cadastro de Tarefas</th>
+        </tr>
+        <tr>
+            <td><label for="descricao">Descrição:</label></td>
+            <td><input type="text" id="descricao" /></td>
+        </tr>
+        <tr>
+            <td><label for="responsavel">Responsável:</label></td>
+            <td><input type="text" id="responsavel" /></td>
+        </tr>
+        <tr>
+            <td><label for="prazo">Prazo:</label></td>
+            <td><input type="date" id="prazo" /></td>
+        </tr>
+        <tr>
+            <td colspan="2" align="center"><button onclick="inserirTarefa()">Inserir Tarefa</button></td>
+        </tr>
+    </table>
+
+    <br />
+
+    <table id="todoTable" border="1">
+        <thead>
             <tr>
-                <th colspan="3" align=˜center˜>Cadastro de Tarefas</th>
+                <th colspan="6" align=˜center˜>Listagem de Tarefas</th>
             </tr>
             <tr>
-                <td><label for="descricao">Descrição:</label></td>
-                <td><input type="text" id="descricao" /></td>
+                <th>Situacao</th>
+                <th>Descricão</th>
+                <th>Responsável</th>
+                <th>Prazo</th>
+                <th>Editar</th>
+                <th>Apagar</th>
             </tr>
-            <tr>
-                <td><label for="responsavel">Responsável:</label></td>
-                <td><input type="text" id="responsavel" /></td>
-            </tr>
-            <tr>
-                <td><label for="prazo">Prazo:</label></td>
-                <td><input type="date" id="prazo" /></td> 
-            </tr>
-            <tr>
-                <td colspan="2" align="center"><button onclick="inserirTarefa()">Inserir Tarefa</button></td>
-            </tr>
-        </table>
+        </thead>
 
-        <br />
-
-        <table id="todoTable" border="1">
-            <thead>
-                <tr>
-                    <th colspan="6" align=˜center˜>Listagem de Tarefas</th>
-                </tr>
-                <tr>
-                    <th>Situacao</th>
-                    <th>Descricão</th>
-                    <th>Responsável</th>
-                    <th>Prazo</th>
-                    <th>Editar</th>
-                    <th>Apagar</th>                       
-                </tr>
-            </thead>
-
-            <tbody id="todoTableBody">
-            </tbody>
-        </table>
+        <tbody id="todoTableBody">
+        </tbody>
+    </table>
 
 
 
-        <script>
-            var listaDeTarefas = new Array;
+    <script>
+        var listaDeTarefas = new Array;
 
-            window.onload = function () {
-                desenharTabela();
+        window.onload = function () {
+            desenharTabela();
+        };
+
+        function desenharTabela() {
+            $.getJSON("http://localhost:8080/api/tarefas", function (res) {
+                listaDeTarefas = res;
+            }).done(syncDesenhaTabela);
+        }
+        function syncDesenhaTabela() {
+            document.getElementById('todoTableBody').innerHTML = '';
+
+            var tabela = [];
+
+            for (i = 0; i < listaDeTarefas.length; i++) {
+                tabela.push('<tr>');
+                    console.log(listaDeTarefas);
+                    console.log(listaDeTarefas[i].atualiza === 'true');
+                    console.log(listaDeTarefas[i].terminada === 'true');            
+                if (!listaDeTarefas[i].terminada === 'true' && !listaDeTarefas[i].atualiza === 'true') {
+                    console.log(listaDeTarefas[i].terminada);    
+                    tabela.push('<td><input type="checkbox" value="' + listaDeTarefas[i].id + '" onclick="completarTarefa()"></td>');
+                    tabela.push('<td>' + listaDeTarefas[i].descricao + '</td>');
+                    tabela.push('<td>' + listaDeTarefas[i].responsavel + '</td>');
+                    tabela.push('<td>' + formatarData(listaDeTarefas[i].prazo) + '</td>');
+
+                } else if (listaDeTarefas[i].atualiza === 'true') {
+
+                    if (listaDeTarefas[i].terminada === 'true') {
+                        tabela.push('<td><input id="alteraTerminada" type="checkbox" value="' + listaDeTarefas[i].id + '" onclick="" checked></td>');
+                    } else {
+                        tabela.push('<td><input id="alteraTerminada" type="checkbox" value="' + listaDeTarefas[i].id + '" onclick=""></td>');
+                    }
+                    tabela.push('<td><input id="alteraDescricao" type="text" value="' + listaDeTarefas[i].descricao + '"></td>');
+                    tabela.push('<td><input id="alteraResponsavel" type="text" value="' + listaDeTarefas[i].responsavel + '"></td>');
+                    tabela.push('<td><input id="alteraPrazo" type="date" value="' + listaDeTarefas[i].prazo + '"></td>');
+                    tabela.push('<td><button value="' + i + '" onclick="alterarTarefa()">Alterar</button></td>');
+                    tabela.push('<td><button value="' + i + '" onclick="cancelarEditarTarefa()">Cancelar</button></td>');
+                    tabela.push('</tr>');
+                    continue;
+                } else {
+                    tabela.push('<td><input type="checkbox" value="' + listaDeTarefas[i].id + '" onclick="completarTarefa(this)" checked></td>');
+                    tabela.push('<td><strike>' + listaDeTarefas[i].descricao + '</strike></td>');
+                    tabela.push('<td><strike>' + listaDeTarefas[i].responsavel + '</strike></td>');
+                    tabela.push('<td><strike>' + formatarData(listaDeTarefas[i].prazo) + '</strike></td>');
+                }
+
+                tabela.push('<td><button value="' + i + '" onclick="marcaEditarTarefa(this)">Editar</button></td>');
+                tabela.push('<td><button value="' + i + '" onclick="deletarTarefa()">Apagar</button></td>');
+                tabela.push('</tr>');
+            }
+            document.getElementById('todoTableBody').innerHTML = tabela.join('');
+        }
+
+        function inserirTarefa() {
+
+            let tarefa = {
+                descricao: document.getElementById('descricao').value,
+                prazo: document.getElementById('prazo').value,
+                responsavel: document.getElementById('responsavel').value,
+                terminada: false,
+                atualiza: false
             };
 
+            $.post("http://localhost:8080/api/tarefa", tarefa, function (res) {
+                console.log('INSERIU');
+            });
 
+            document.getElementById('descricao').value = '';
+            document.getElementById('prazo').value = '';
+            document.getElementById('responsavel').value = '';
 
-            function desenharTabela() {
-                document.getElementById('todoTableBody').innerHTML = '';
+            desenharTabela();
+        }
 
-                var tabela = [];
+        function deletarTarefa() {
+            $.get('http://localhost:8080/api/tarefa?id=' + event.srcElement.value);
 
-                for (i = 0; i < listaDeTarefas.length; i++) {
-                    tabela.push('<tr>');
+            desenharTabela();
+        }
 
-                    if (!listaDeTarefas[i].terminada && !listaDeTarefas[i].atualiza) {
-                        tabela.push('<td><input type="checkbox" value="' + i + '" onclick="completarTarefa()"></td>');
-                        tabela.push('<td>' + listaDeTarefas[i].descricao + '</td>');
-                        tabela.push('<td>' + listaDeTarefas[i].responsavel + '</td>');
-                        tabela.push('<td>' + formatarData(listaDeTarefas[i].prazo) + '</td>');
-                    } else if (listaDeTarefas[i].atualiza) {
-                        if (listaDeTarefas[i].terminada) {
-                            tabela.push('<td><input id="alteraTerminada" type="checkbox" value="' + i + '" onclick="" checked></td>');
-                        } else {
-                            tabela.push('<td><input id="alteraTerminada" type="checkbox" value="' + i + '" onclick=""></td>');
-                        }
-                        tabela.push('<td><input id="alteraDescricao" type="text" value="' + listaDeTarefas[i].descricao + '"></td>');
-                        tabela.push('<td><input id="alteraResponsavel" type="text" value="' + listaDeTarefas[i].responsavel + '"></td>');
-                        tabela.push('<td><input id="alteraPrazo" type="date" value="' + listaDeTarefas[i].prazo + '"></td>');
-                        tabela.push('<td><button value="' + i + '" onclick="alterarTarefa()">Alterar</button></td>');
-                        tabela.push('<td><button value="' + i + '" onclick="cancelarEditarTarefa()">Cancelar</button></td>');
-                        tabela.push('</tr>');
-                        continue;
-                    } else {
-                        tabela.push('<td><input type="checkbox" value="' + i + '" onclick="completarTarefa()" checked></td>');
-                        tabela.push('<td><strike>' + listaDeTarefas[i].descricao + '</strike></td>');
-                        tabela.push('<td><strike>' + listaDeTarefas[i].responsavel + '</strike></td>');
-                        tabela.push('<td><strike>' + formatarData(listaDeTarefas[i].prazo) + '</strike></td>');
-                    }
+        function completarTarefa(element) {
+            $.get('http://localhost:8080/api/tarefa/terminar?id=' + element.value);
+            desenharTabela();
+        }
+  
+        function marcaEditarTarefa(element) {
+            $.get('http://localhost:8080/api/tarefa/atualizar?id=' + element.value);
+            desenharTabela();
+        }
 
-                    tabela.push('<td><button value="' + i + '" onclick="marcaEditarTarefa()">Editar</button></td>');
-                    tabela.push('<td><button value="' + i + '" onclick="deletarTarefa()">Apagar</button></td>');
-                    tabela.push('</tr>');
-                }
-                document.getElementById('todoTableBody').innerHTML = tabela.join('');
+        function cancelarEditarTarefa(element) {
+            listaDeTarefas[parseInt(event.srcElement.value)].atualiza = false;
+
+            desenharTabela();
+        }
+
+        function alterarTarefa() {
+            $.getJSON("http://localhost:8080/api/tarefas", function (res) {
+                listaDeTarefas = res;
+            }).done(alterarTarefaSync);
+        }
+        function alterarTarefaSync(element) {
+        
+            console.log(listaDeTarefas);
+
+            var tarefa = listaDeTarefas[parseInt(element.value)];
+
+            tarefa.descricao = document.getElementById('alteraDescricao').value;
+            tarefa.responsavel = document.getElementById('alteraResponsavel').value;
+            tarefa.prazo = document.getElementById('alteraPrazo').value;
+
+            if (document.getElementById('alteraTerminada').checked) {
+                tarefa.terminada = "true";
+            } else {
+                tarefa.terminada = "false";
             }
 
-            function inserirTarefa() {
+            tarefa.atualiza = "false";
 
-                listaDeTarefas.push({
-                    descricao: document.getElementById('descricao').value,
-                    prazo: document.getElementById('prazo').value,
-                    responsavel: document.getElementById('responsavel').value,
-                    terminada: false,
-                    atualiza: false
-                });
-		
+            $.post("http://localhost:8080/api/update", listaDeTarefas, function (res) {
+                console.log('UPDATE');
+            }).done(desenharTabela);
+        }
 
-		$.post("http://localhost:8080/api/escrever", listaDeTarefas, function(response) {
-			console.log('entrou');	
-		});
+        function formatarData(data) {
+            var dataDividida = data.split("-");
+            return dataDividida[2] + '/' + dataDividida[1] + '/' + dataDividida[0];
+        }
+    </script>
+</body>
 
-                document.getElementById('descricao').value = '';
-                document.getElementById('prazo').value = '';
-                document.getElementById('responsavel').value = '';
-
-                desenharTabela();
-            }
-
-            function deletarTarefa() {
-                listaDeTarefas.splice(parseInt(event.srcElement.value), 1);
-
-                desenharTabela();
-            }
-
-            function completarTarefa() {
-                listaDeTarefas[parseInt(event.srcElement.value)].terminada = true;
-
-                desenharTabela();
-            }
-            function marcaEditarTarefa() {
-                listaDeTarefas[parseInt(event.srcElement.value)].atualiza = true;
-
-                desenharTabela();
-            }
-            function cancelarEditarTarefa() {
-                listaDeTarefas[parseInt(event.srcElement.value)].atualiza = false;
-
-                desenharTabela();
-            }
-
-            function alterarTarefa() {
-                var tarefa = listaDeTarefas[parseInt(event.srcElement.value)];
-
-                tarefa.descricao = document.getElementById('alteraDescricao').value;
-                tarefa.responsavel = document.getElementById('alteraResponsavel').value;
-                tarefa.prazo = document.getElementById('alteraPrazo').value;
-
-                if (document.getElementById('alteraTerminada').checked) {
-                    tarefa.terminada = true;
-                } else {
-                    tarefa.terminada = false;
-                }
-
-                tarefa.atualiza = false;
-
-                desenharTabela();
-            }
-
-            function formatarData(data) {
-                var dataDividida = data.split("-");
-
-                return dataDividida[2] + '/' + dataDividida[1] + '/' + dataDividida[0];
-            }
-
-        </script> 
-    </body>
 </html>
